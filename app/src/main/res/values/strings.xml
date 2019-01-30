@@ -1,0 +1,15 @@
+<resources>
+    <string name="app_name">Popular Movies: Stage 2</string>
+    <string name="data_loading_error">There was a problem loading Data, please try again</string>
+
+    // trailer
+    <string name="movie_title_trailer">Trailers</string>
+
+    // review
+    <string name="review_title">Reviews</string>
+
+    // menu
+    <string name="sort_popular">Popular</string>
+    <string name="sort_rated">Highest rated</string>
+    <string name="sort_favorite">Favorites</string>
+</resources>
