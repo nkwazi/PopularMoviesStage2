@@ -34,10 +34,12 @@ public class DetailActivity extends AppCompatActivity {
         TextView movieRating = findViewById(R.id.movie_rating);
         TextView movieReleaseDate = findViewById(R.id.movie_release_date);
         ImageView moviePicture = findViewById(R.id.movie_picture);
+        ImageView trailerPicture = findViewById(R.id.trailer_play_button);
 
         Intent intent = getIntent();
 
         Movie movie = intent.getParcelableExtra("movie");
+        Trailer trailer = intent.getParcelableExtra("trailer");
 
         movieTitle.setText(movie.movieTitle);
         movieOverview.setText(movie.movieOverview);
@@ -45,5 +47,6 @@ public class DetailActivity extends AppCompatActivity {
         movieReleaseDate.setText(RELEASED + movie.movieReleaseDate);
 
         Picasso.get().load(BASE_URL + movie.moviePosterPath).into(moviePicture);
+        //Picasso.get().load(R.drawable.baseline_play_arrow_black_18dp).into(trailerPicture);
     }
 }

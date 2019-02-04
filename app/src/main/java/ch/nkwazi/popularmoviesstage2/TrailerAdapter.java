@@ -42,7 +42,7 @@ public class TrailerAdapter extends RecyclerView.Adapter<TrailerAdapter.TrailerV
         public void onClick(View v) {
 
         }
-    }
+    } 
 
     @NonNull
     @Override
