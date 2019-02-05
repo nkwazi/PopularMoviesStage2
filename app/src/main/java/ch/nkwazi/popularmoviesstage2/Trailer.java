@@ -49,7 +49,7 @@ public class Trailer implements Parcelable {
 
         @Override
         public Trailer[] newArray(int size) {
-            return new Trailer[0];
+            return new Trailer[size];
         }
     };
 }

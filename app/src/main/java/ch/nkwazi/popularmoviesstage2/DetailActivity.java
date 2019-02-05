@@ -1,12 +1,19 @@
 package ch.nkwazi.popularmoviesstage2;
 
 import android.content.Intent;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.squareup.picasso.Picasso;
+
+import java.util.List;
+
+import butterknife.BindView;
 
 /**
  * Created by nkwazi on 29.01.19.
@@ -18,13 +25,18 @@ public class DetailActivity extends AppCompatActivity {
     private static final String RATING = "Rating: ";
     private static final String RELEASED = "Released: ";
 
+    @BindView(R.id.detail_trailers)
+    RecyclerView trailer_rv;
+
+    private TrailerAdapter trailerAdapter;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_detail);
 
         populateUI();
-
+        populateTrailers();
     }
 
     private void populateUI(){
@@ -34,12 +46,10 @@ public class DetailActivity extends AppCompatActivity {
         TextView movieRating = findViewById(R.id.movie_rating);
         TextView movieReleaseDate = findViewById(R.id.movie_release_date);
         ImageView moviePicture = findViewById(R.id.movie_picture);
-        ImageView trailerPicture = findViewById(R.id.trailer_play_button);
 
         Intent intent = getIntent();
 
         Movie movie = intent.getParcelableExtra("movie");
-        Trailer trailer = intent.getParcelableExtra("trailer");
 
         movieTitle.setText(movie.movieTitle);
         movieOverview.setText(movie.movieOverview);
@@ -47,6 +57,31 @@ public class DetailActivity extends AppCompatActivity {
         movieReleaseDate.setText(RELEASED + movie.movieReleaseDate);
 
         Picasso.get().load(BASE_URL + movie.moviePosterPath).into(moviePicture);
-        //Picasso.get().load(R.drawable.baseline_play_arrow_black_18dp).into(trailerPicture);
+    }
+
+    private void populateTrailers(){
+
+        LinearLayoutManager layoutManager =
+                new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false);
+        trailer_rv.setLayoutManager(layoutManager);
+        trailer_rv.setHasFixedSize(true);
+
+        trailerAdapter = new TrailerAdapter(this);
+        trailer_rv.setAdapter(trailerAdapter);
+
+        loadTrailerData();
+    }
+
+    private void loadTrailerData(){
+        new FetchTrailerTask().execute();
+    }
+
+    class FetchTrailerTask extends AsyncTask<String, Void, List<Trailer>>{
+
+
+        @Override
+        protected List<Trailer> doInBackground(String... strings) {
+            return null;
+        }
     }
 }

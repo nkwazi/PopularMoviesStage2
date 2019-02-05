@@ -1,5 +1,8 @@
 package ch.nkwazi.popularmoviesstage2;
 
+import android.content.Context;
+import android.content.Intent;
+import android.net.Uri;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -11,38 +14,22 @@ import com.squareup.picasso.Picasso;
 
 import java.util.List;
 
+import butterknife.BindView;
+import butterknife.ButterKnife;
+
 /**
  * Created by nkwazi on 29.01.19.
  */
 
 public class TrailerAdapter extends RecyclerView.Adapter<TrailerAdapter.TrailerViewHolder> {
 
-    public TrailerAdapterOnClickHandler trailerAdapterOnClickListener;
-    private List<Trailer> trailerList;
+    private Context context;
+    public List<Trailer> trailerList;
 
-    public interface TrailerAdapterOnClickHandler {
-        void onClick(Trailer trailer);
+    public TrailerAdapter(Context context){
+        this.context = context;
     }
 
-    TrailerAdapter(TrailerAdapterOnClickHandler mClickHandler) {
-        this.trailerAdapterOnClickListener = mClickHandler;
-    }
-
-    public class TrailerViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
-
-        public final ImageView imageView;
-
-        TrailerViewHolder(View view){
-            super(view);
-            imageView = view.findViewById(R.id.trailer_play_button);
-            view.setOnClickListener(this);
-        }
-
-        @Override
-        public void onClick(View v) {
-
-        }
-    } 
 
     @NonNull
     @Override
@@ -63,5 +50,25 @@ public class TrailerAdapter extends RecyclerView.Adapter<TrailerAdapter.TrailerV
             return 0;
         }
         return trailerList.size();
+    }
+
+    class TrailerViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
+
+        @BindView(R.id.trailer_rv)
+        ImageView imageView;
+
+        TrailerViewHolder(View view){
+            super(view);
+            ButterKnife.bind(this, view);
+            view.setOnClickListener(this);
+        }
+
+        @Override
+        public void onClick(View v) {
+            int position = getAdapterPosition();
+            Trailer trailer = trailerList.get(position);
+            Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse("vnd.youtube:" + trailer.getKey()));
+            v.getContext().startActivity(intent);
+        }
     }
 }
