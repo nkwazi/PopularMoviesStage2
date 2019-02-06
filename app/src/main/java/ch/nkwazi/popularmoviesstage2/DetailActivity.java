@@ -25,6 +25,8 @@ public class DetailActivity extends AppCompatActivity {
     private static final String RATING = "Rating: ";
     private static final String RELEASED = "Released: ";
 
+    public static final String TAG = DetailActivity.class.getSimpleName();
+
     @BindView(R.id.detail_trailers)
     RecyclerView trailer_rv;
 
@@ -49,7 +51,7 @@ public class DetailActivity extends AppCompatActivity {
 
         Intent intent = getIntent();
 
-        Movie movie = intent.getParcelableExtra("movie");
+        Movie movie = intent.getParcelableExtra(Movie.TAG);
 
         movieTitle.setText(movie.movieTitle);
         movieOverview.setText(movie.movieOverview);
