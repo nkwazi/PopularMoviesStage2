@@ -36,7 +36,7 @@ public class DetailActivity extends AppCompatActivity {
         setContentView(R.layout.activity_detail);
 
         populateUI();
-        populateTrailers();
+        //populateTrailers();
     }
 
     private void populateUI(){
