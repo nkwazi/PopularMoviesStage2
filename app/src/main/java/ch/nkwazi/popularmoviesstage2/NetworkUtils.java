@@ -122,5 +122,19 @@ public class NetworkUtils {
 
         return url;
     }
+
+    public static URL buildTrailerUrl() {
+        Uri uri = Uri.parse(MOVIE_DB_URL).buildUpon()
+                .appendPath(VERSION)
+                .appendQueryParameter(QUERY_PARAM, KEY)
+                .build();
+        URL url = null;
+        try {
+            url = new URL(uri.toString());
+        } catch (MalformedURLException e){
+            e.printStackTrace();
+        }
+        return url;
+    }
 }
 
