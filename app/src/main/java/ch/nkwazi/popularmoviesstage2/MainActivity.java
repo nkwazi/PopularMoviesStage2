@@ -1,24 +1,28 @@
 package ch.nkwazi.popularmoviesstage2;
 
-import android.content.Intent;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
-import android.view.View;
 import android.widget.ProgressBar;
+import android.widget.Toast;
 
-import java.net.URL;
 import java.util.List;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
+import ch.nkwazi.popularmoviesstage2.api.ApiResponse;
+import ch.nkwazi.popularmoviesstage2.api.RetrofitClient;
+import ch.nkwazi.popularmoviesstage2.api.Service;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
-public class MainActivity extends AppCompatActivity implements MovieAdapter.MovieAdapterOnClickHandler {
+public class MainActivity extends AppCompatActivity {
 
     @BindView(R.id.fetchingDataPB)
     ProgressBar mProgressBar;
@@ -39,22 +43,7 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.Movi
         mRecyclerView.setLayoutManager(layoutManager);
         mRecyclerView.setHasFixedSize(true);
 
-        movieAdapter = new MovieAdapter(this);
-
-        mRecyclerView.setAdapter(movieAdapter);
-
-        loadMovieData("popular");
-    }
-
-    @Override
-    public void onClick(Movie movie) {
-        Intent movieDetailIntent = new Intent(MainActivity.this, DetailActivity.class);
-        movieDetailIntent.putExtra("movie", movie);
-        startActivity(movieDetailIntent);
-    }
-
-    private void loadMovieData(String pref){
-        new FetchMovieTask().execute(pref);
+        loadMovies("top_rated");
     }
 
     @Override
@@ -68,50 +57,46 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.Movi
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.sort_popular:
-                new FetchMovieTask().execute("popular");
+                loadMovies("popular");
                 return true;
             case R.id.sort_rated:
-                new FetchMovieTask().execute("top_rated");
+                loadMovies("top_rated");
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
         }
     }
 
-    /**
-     * Created by nkwazi on 05.09.18.
-     */
+    private void loadMovies(String sort) {
+        Service apiService = RetrofitClient.getClient().create(Service.class);
 
-    public class FetchMovieTask extends AsyncTask<String, Void, List<Movie>> {
+        Call<ApiResponse<Movie>> call;
 
-        @Override
-        protected void onPreExecute() {
-            mProgressBar.setVisibility(View.VISIBLE);
-            super.onPreExecute();
+        if (sort.equals("top_rated")){
+            call = apiService.getTopRatedMovies(BuildConfig.API_KEY);
+        } else {
+            call = apiService.getPopularMovies(BuildConfig.API_KEY);
         }
 
-        @Override
-        protected List<Movie> doInBackground(String... params) {
-
-            String pref = params[0];
-            URL movieRequest = NetworkUtils.buildMovieUrl(pref);
-
-            try {
-                String jsonMovieResponse = NetworkUtils.makeHttpRequest(movieRequest);
-                return NetworkUtils.getMovieData(MainActivity.this, jsonMovieResponse);
-
-            } catch (Exception e) {
-                e.printStackTrace();
-                return null;
+        call.enqueue(new Callback<ApiResponse<Movie>>() {
+            @Override
+            public void onResponse(Call<ApiResponse<Movie>> call, Response<ApiResponse<Movie>> response) {
+                if (response.isSuccessful()) {
+                    List<Movie> movies = fetchResults(response);
+                    mRecyclerView.setAdapter(new MovieAdapter(getApplicationContext(), movies));
+                }
             }
-        }
 
-        @Override
-        protected void onPostExecute(List<Movie> movieList) {
-            mProgressBar.setVisibility(View.INVISIBLE);
-            if (movieList != null){
-                movieAdapter.setMovieList(movieList);
+            @Override
+            public void onFailure(Call<ApiResponse<Movie>> call, Throwable t) {
+                Log.d("Error", t.getMessage());
+                Toast.makeText(MainActivity.this, "Error Fetching Data!", Toast.LENGTH_SHORT).show();
             }
-        }
+        });
+    }
+
+    private List<Movie> fetchResults(Response<ApiResponse<Movie>> response) {
+        ApiResponse<Movie> movieApiResponse = response.body();
+        return movieApiResponse.results;
     }
 }
