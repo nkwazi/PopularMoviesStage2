@@ -14,6 +14,14 @@ import com.squareup.picasso.Picasso;
 import java.util.List;
 
 import butterknife.BindView;
+import butterknife.ButterKnife;
+import ch.nkwazi.popularmoviesstage2.api.ApiResponse;
+import ch.nkwazi.popularmoviesstage2.api.RetrofitClient;
+import ch.nkwazi.popularmoviesstage2.api.Service;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
+
 
 /**
  * Created by nkwazi on 29.01.19.
@@ -31,14 +39,20 @@ public class DetailActivity extends AppCompatActivity {
     RecyclerView trailer_rv;
 
     private TrailerAdapter trailerAdapter;
+    private Movie movie;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_detail);
 
+        ButterKnife.bind(this);
+
+        Intent intent = getIntent();
+        movie = intent.getParcelableExtra(Movie.TAG);
+
         populateUI();
-        //populateTrailers();
+        populateTrailers(savedInstanceState);
     }
 
     private void populateUI(){
@@ -61,29 +75,45 @@ public class DetailActivity extends AppCompatActivity {
         Picasso.get().load(BASE_URL + movie.moviePosterPath).into(moviePicture);
     }
 
-    private void populateTrailers(){
+    private void populateTrailers(Bundle savedInstance){
 
         LinearLayoutManager layoutManager =
-                new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false);
+                new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false);
         trailer_rv.setLayoutManager(layoutManager);
         trailer_rv.setHasFixedSize(true);
 
         trailerAdapter = new TrailerAdapter(this);
         trailer_rv.setAdapter(trailerAdapter);
 
-        loadTrailerData();
+        loadTrailerData(savedInstance);
     }
 
-    private void loadTrailerData(){
-        new FetchTrailerTask().execute();
-    }
+    private void loadTrailerData(Bundle savedInstance){
+        if (savedInstance != null && savedInstance.containsKey(Movie.TAG)) {
+            trailerAdapter.setItems(savedInstance.<Trailer>getParcelableArrayList(Movie.TAG));
+        } else {
+            Service apiService = RetrofitClient.getClient().create(Service.class);
 
-    class FetchTrailerTask extends AsyncTask<String, Void, List<Trailer>>{
+            //TODO replace this in the model
+            int numb = Integer.parseInt(movie.movieId);
 
+            Call<ApiResponse<Trailer>> call  = apiService.getMovieTrailers(numb, BuildConfig.API_KEY);
 
-        @Override
-        protected List<Trailer> doInBackground(String... strings) {
-            return null;
+            call.enqueue(new Callback<ApiResponse<Trailer>>() {
+                @Override
+                public void onResponse(Call<ApiResponse<Trailer>> call, Response<ApiResponse<Trailer>> response) {
+                    if (response.isSuccessful()) {
+                        List<Trailer> trailers = response.body().results;
+                        trailerAdapter.setItems(trailers);
+                    }
+                }
+
+                @Override
+                public void onFailure(Call<ApiResponse<Trailer>> call, Throwable t) {
+
+                }
+            });
         }
     }
+
 }
