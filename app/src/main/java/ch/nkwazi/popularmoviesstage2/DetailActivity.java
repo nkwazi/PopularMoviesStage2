@@ -1,7 +1,6 @@
 package ch.nkwazi.popularmoviesstage2;
 
 import android.content.Intent;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
@@ -38,7 +37,11 @@ public class DetailActivity extends AppCompatActivity {
     @BindView(R.id.detail_trailers)
     RecyclerView trailer_rv;
 
+    @BindView(R.id.rv_review)
+    RecyclerView review_rv;
+
     private TrailerAdapter trailerAdapter;
+    private ReviewAdapter reviewAdapter;
     private Movie movie;
 
     @Override
@@ -53,6 +56,7 @@ public class DetailActivity extends AppCompatActivity {
 
         populateUI();
         populateTrailers(savedInstanceState);
+        populateReviews(savedInstanceState);
     }
 
     private void populateUI(){
@@ -110,6 +114,47 @@ public class DetailActivity extends AppCompatActivity {
 
                 @Override
                 public void onFailure(Call<ApiResponse<Trailer>> call, Throwable t) {
+
+                }
+            });
+        }
+    }
+
+    private void populateReviews(Bundle savedInstance) {
+
+        LinearLayoutManager layoutManager = new LinearLayoutManager(this,
+                LinearLayoutManager.VERTICAL, false);
+        review_rv.setLayoutManager(layoutManager);
+        review_rv.setHasFixedSize(true);
+
+        reviewAdapter = new ReviewAdapter(this);
+        review_rv.setAdapter(reviewAdapter);
+
+        loadReviewData(savedInstance);
+    }
+
+    private void loadReviewData(Bundle savedInstance) {
+        if (savedInstance != null && savedInstance.containsKey(Movie.TAG)) {
+            reviewAdapter.setItems(savedInstance.<Review>getParcelableArrayList(Movie.TAG));
+        } else {
+            Service apiService = RetrofitClient.getClient().create(Service.class);
+
+            //TODO replace this in the model
+            int id = Integer.parseInt(movie.movieId);
+
+            Call<ApiResponse<Review>> call  = apiService.getMovieReviews(id, BuildConfig.API_KEY);
+
+            call.enqueue(new Callback<ApiResponse<Review>>() {
+                @Override
+                public void onResponse(Call<ApiResponse<Review>> call, Response<ApiResponse<Review>> response) {
+                    if (response.isSuccessful()) {
+                        List<Review> reviews = response.body().results;
+                        reviewAdapter.setItems(reviews);
+                    }
+                }
+
+                @Override
+                public void onFailure(Call<ApiResponse<Review>> call, Throwable t) {
 
                 }
             });
