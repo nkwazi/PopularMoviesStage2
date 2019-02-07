@@ -3,27 +3,26 @@ package ch.nkwazi.popularmoviesstage2;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import com.google.gson.annotations.SerializedName;
+
 /**
  * Created by nkwazi on 29.01.19.
  */
 
 public class Review implements Parcelable {
 
-    private String id;
+    @SerializedName("author")
+    private String author;
+    @SerializedName("content")
     private String content;
 
-    public Review(String id, String content) {
-        this.id = id;
-        this.content = content;
-    }
-
     public Review(Parcel in) {
-        id = in.readString();
+        author = in.readString();
         content = in.readString();
     }
 
-    public String getId() {
-        return id;
+    public String getAuthor() {
+        return author;
     }
 
     public String getContent() {
@@ -37,7 +36,7 @@ public class Review implements Parcelable {
 
     @Override
     public void writeToParcel(Parcel dest, int flags) {
-        dest.writeString(id);
+        dest.writeString(author);
         dest.writeString(content);
     }
 
@@ -50,7 +49,7 @@ public class Review implements Parcelable {
 
         @Override
         public Review[] newArray(int size) {
-            return new Review[0];
+            return new Review[size];
         }
     };
 }
