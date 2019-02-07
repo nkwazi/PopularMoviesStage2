@@ -12,6 +12,7 @@ import android.widget.ImageView;
 
 import com.squareup.picasso.Picasso;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import butterknife.BindView;
@@ -26,7 +27,9 @@ public class TrailerAdapter extends RecyclerView.Adapter<TrailerAdapter.TrailerV
     private Context context;
     public List<Trailer> trailerList;
 
-    public TrailerAdapter(Context context){
+    public static final String YOUTUBE_THUMB__URL = "https://img.youtube.com/vi/";
+
+    public TrailerAdapter(Context context) {
         this.context = context;
     }
 
@@ -34,14 +37,18 @@ public class TrailerAdapter extends RecyclerView.Adapter<TrailerAdapter.TrailerV
     @NonNull
     @Override
     public TrailerViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.trailer_detail, parent, false);
-        return new TrailerAdapter.TrailerViewHolder(view);
+        View view = LayoutInflater.from(context).inflate(R.layout.trailer_detail, parent, false);
+        return new TrailerViewHolder(view);
     }
 
     @Override
     public void onBindViewHolder(@NonNull TrailerViewHolder holder, int position) {
-        int image = R.drawable.baseline_play_arrow_black_18dp;
-        Picasso.get().load(image).into(holder.imageView);
+        //int image = R.drawable.baseline_play_arrow_black_18dp;
+        Trailer trailerItem = trailerList.get(position);
+        Uri thumbUrl = Uri.parse(YOUTUBE_THUMB__URL).buildUpon()
+                .appendPath(trailerItem.getKey()).appendPath("hqdefault.jpg")
+                .build();
+        Picasso.get().load(thumbUrl).into(holder.imageView);
     }
 
     @Override
@@ -50,6 +57,12 @@ public class TrailerAdapter extends RecyclerView.Adapter<TrailerAdapter.TrailerV
             return 0;
         }
         return trailerList.size();
+    }
+
+    public void setItems(List<Trailer> items) {
+        trailerList = new ArrayList<>();
+        this.trailerList.addAll(items);
+        notifyDataSetChanged();
     }
 
     class TrailerViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
