@@ -3,19 +3,18 @@ package ch.nkwazi.popularmoviesstage2;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import com.google.gson.annotations.SerializedName;
+
 /**
  * Created by nkwazi on 29.01.19.
  */
 
 public class Trailer implements Parcelable {
 
+    @SerializedName("name")
     private String name;
+    @SerializedName("key")
     private String key;
-
-    public Trailer(String name, String key){
-        this.name = name;
-        this.key = key;
-    }
 
     public Trailer(Parcel in){
         name = in.readString();
