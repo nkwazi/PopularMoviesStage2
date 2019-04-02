@@ -10,9 +10,8 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.widget.ProgressBar;
 import android.widget.Toast;
-
 import java.util.List;
-
+import android.content.Intent;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import ch.nkwazi.popularmoviesstage2.api.ApiResponse;
@@ -62,9 +61,17 @@ public class MainActivity extends AppCompatActivity {
             case R.id.sort_rated:
                 loadMovies("top_rated");
                 return true;
+            case R.id.favorite:
+                launchFavoriteActivity();
+                return true;
             default:
                 return super.onOptionsItemSelected(item);
         }
+    }
+
+    private void launchFavoriteActivity() {
+        Intent intent = new Intent(this,FavoriteActivity.class);
+        startActivity(intent);
     }
 
     private void loadMovies(String sort) {

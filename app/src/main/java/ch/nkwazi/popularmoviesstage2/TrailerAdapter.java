@@ -43,7 +43,6 @@ public class TrailerAdapter extends RecyclerView.Adapter<TrailerAdapter.TrailerV
 
     @Override
     public void onBindViewHolder(@NonNull TrailerViewHolder holder, int position) {
-        //int image = R.drawable.baseline_play_arrow_black_18dp;
         Trailer trailerItem = trailerList.get(position);
         Uri thumbUrl = Uri.parse(YOUTUBE_THUMB__URL).buildUpon()
                 .appendPath(trailerItem.getKey()).appendPath("hqdefault.jpg")

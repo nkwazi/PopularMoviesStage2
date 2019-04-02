@@ -6,7 +6,10 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
+
+import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -38,6 +41,7 @@ public class ReviewAdapter extends RecyclerView.Adapter<ReviewAdapter.ReviewView
     @Override
     public void onBindViewHolder(@NonNull ReviewViewHolder holder, int position) {
         Review reviewItem = reviewList.get(position);
+        Picasso.get().load(R.drawable.baseline_account_circle_black_18dp).into(holder.reviewAvatar);
         holder.reviewAuthor.setText(reviewItem.getAuthor());
         holder.reviewContent.setText(reviewItem.getContent());
     }
@@ -60,6 +64,8 @@ public class ReviewAdapter extends RecyclerView.Adapter<ReviewAdapter.ReviewView
 
     class ReviewViewHolder extends RecyclerView.ViewHolder {
 
+        @BindView(R.id.review_avatar)
+        ImageView reviewAvatar;
         @BindView(R.id.review_author)
         TextView reviewAuthor;
         @BindView(R.id.review_content)

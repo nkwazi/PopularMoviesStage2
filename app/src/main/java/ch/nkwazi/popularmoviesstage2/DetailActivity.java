@@ -5,6 +5,7 @@ import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -82,7 +83,7 @@ public class DetailActivity extends AppCompatActivity {
     private void populateTrailers(Bundle savedInstance){
 
         LinearLayoutManager layoutManager =
-                new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false);
+                new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false);
         trailer_rv.setLayoutManager(layoutManager);
         trailer_rv.setHasFixedSize(true);
 
@@ -108,13 +109,16 @@ public class DetailActivity extends AppCompatActivity {
                 public void onResponse(Call<ApiResponse<Trailer>> call, Response<ApiResponse<Trailer>> response) {
                     if (response.isSuccessful()) {
                         List<Trailer> trailers = response.body().results;
+                        if (trailers.isEmpty()){
+                            trailer_rv.setVisibility(View.GONE);
+                        }
                         trailerAdapter.setItems(trailers);
                     }
                 }
 
                 @Override
                 public void onFailure(Call<ApiResponse<Trailer>> call, Throwable t) {
-
+                    trailer_rv.setVisibility(View.GONE);
                 }
             });
         }
