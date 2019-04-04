@@ -14,7 +14,7 @@ public class MovieDbHelper extends SQLiteOpenHelper {
 
     @Override
     public void onCreate(SQLiteDatabase db) {
-        final String SQL_CREATE_MOVIE_TABLE = "CREATE TABLE "+ MovieContract.MovieEntry.TABLE_MOVIE
+        final String SQL_CREATE_MOVIE_TABLE = "CREATE TABLE " + MovieContract.MovieEntry.TABLE_MOVIE
                 + " (" + MovieContract.MovieEntry.COLUMN_MOVIE_ID + " INTEGER PRIMARY KEY,"
                 +MovieContract.MovieEntry.COLUMN_TMDB_ID + " INTEGER , "
                 +MovieContract.MovieEntry.COLUMN_MOVIE_TITLE +" TEXT, "
@@ -29,7 +29,7 @@ public class MovieDbHelper extends SQLiteOpenHelper {
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
 
-        db.execSQL("DROP TABLE IF EXISTS" +MovieContract.MovieEntry.TABLE_MOVIE);
+        db.execSQL("DROP TABLE IF EXISTS " + MovieContract.MovieEntry.TABLE_MOVIE);
         db.execSQL("DELETE FROM SQLITE_SEQUENCE WHERE NAME = ' "+
                 MovieContract.MovieEntry.TABLE_MOVIE+"'");
         onCreate(db);
