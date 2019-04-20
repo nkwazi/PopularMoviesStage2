@@ -3,10 +3,10 @@ package ch.nkwazi.popularmoviesstage2;
 import android.content.res.Configuration;
 import android.database.Cursor;
 import android.os.Bundle;
-import android.support.v4.app.LoaderManager;
-import android.support.v4.content.CursorLoader;
-import android.support.v4.content.Loader;
-import android.support.v7.app.AppCompatActivity;
+import androidx.loader.app.LoaderManager;
+import androidx.loader.content.CursorLoader;
+import androidx.loader.content.Loader;
+import androidx.appcompat.app.AppCompatActivity;
 import android.widget.GridView;
 
 import ch.nkwazi.popularmoviesstage2.data.MovieContract;
@@ -25,7 +25,7 @@ public class FavoriteActivity extends AppCompatActivity implements LoaderManager
         setContentView(R.layout.activity_favorite);
 
         setTitle("Favourites");
-        databaseGridView = (GridView) findViewById(R.id.favourite_movie_grid_view);
+        databaseGridView = findViewById(R.id.favourite_movie_grid_view);
         movieCursorAdapter = new MovieCursorAdapter(this,null);
         if (this.getResources().getConfiguration().orientation== Configuration.ORIENTATION_LANDSCAPE)
         {
