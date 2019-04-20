@@ -1,5 +1,6 @@
 package ch.nkwazi.popularmoviesstage2;
 
+import android.content.Context;
 import android.os.Bundle;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.GridLayoutManager;
@@ -29,6 +30,7 @@ public class MainActivity extends AppCompatActivity {
     @BindView(R.id.recyclerView)
     RecyclerView mRecyclerView;
 
+    private Context context = this;
     private MovieAdapter movieAdapter;
 
     @Override
@@ -37,7 +39,7 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         ButterKnife.bind(this);
 
-        GridLayoutManager layoutManager = new GridLayoutManager(this, 2, GridLayoutManager.VERTICAL, false);
+        GridLayoutManager layoutManager = new GridLayoutManager(this, 2);
 
         mRecyclerView.setLayoutManager(layoutManager);
         mRecyclerView.setHasFixedSize(true);
@@ -70,7 +72,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void launchFavoriteActivity() {
-        Intent intent = new Intent(this,FavoriteActivity.class);
+        Intent intent = new Intent(this, FavoriteActivity.class);
         startActivity(intent);
     }
 
@@ -90,7 +92,8 @@ public class MainActivity extends AppCompatActivity {
             public void onResponse(Call<ApiResponse<Movie>> call, Response<ApiResponse<Movie>> response) {
                 if (response.isSuccessful()) {
                     List<Movie> movies = fetchResults(response);
-                    mRecyclerView.setAdapter(new MovieAdapter(getApplicationContext(), movies));
+                    movieAdapter = new MovieAdapter(context, movies);
+                    mRecyclerView.setAdapter(movieAdapter);
                 }
             }
 

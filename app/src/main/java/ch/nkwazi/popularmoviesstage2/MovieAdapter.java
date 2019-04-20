@@ -19,7 +19,7 @@ import java.util.List;
 
 public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.MovieViewHolder> {
 
-    private Context context;
+    private final Context context;
     private List<Movie> movieList;
 
     public MovieAdapter(Context mContext, List<Movie> movieList) {
@@ -29,40 +29,18 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.MovieViewHol
 
     public class MovieViewHolder extends RecyclerView.ViewHolder {
 
-        public final ImageView myImageView;
+        final ImageView myImageView;
 
         MovieViewHolder(View view){
             super(view);
             myImageView = view.findViewById(R.id.coverPicture);
-
-            view.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    int pos = getAdapterPosition();
-                    if(pos != RecyclerView.NO_POSITION){
-                        Intent intent = new Intent(v.getContext(), DetailActivity.class);
-
-                        Movie currentMovie = movieList.get(pos);
-
-                        intent.putExtra(Movie.TAG, currentMovie);
-                        intent.putExtra(DetailActivity.TAG, currentMovie);
-
-                        v.getContext().startActivity(intent);
-                    }
-                }
-            });
         }
     }
 
     @NonNull
     @Override
     public MovieViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        Context context = parent.getContext();
-        int layoutForMovie = R.layout.movie_overview;
-        LayoutInflater inflater = LayoutInflater.from(context);
-        boolean shouldBeAttachedToParent = false;
-
-        View view = inflater.inflate(layoutForMovie, parent, shouldBeAttachedToParent);
+        View view = LayoutInflater.from(context).inflate(R.layout.movie_overview, parent, false);
         return new MovieViewHolder(view);
     }
 
@@ -70,19 +48,20 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.MovieViewHol
     public void onBindViewHolder(@NonNull MovieViewHolder holder, int position) {
         String image = movieList.get(position).moviePosterPath;
         Picasso.get().load("http://image.tmdb.org/t/p/w780".concat(image)).into(holder.myImageView);
+
+        holder.myImageView.setOnClickListener(v -> {
+            Movie currentMovie = movieList.get(position);
+            Intent intent = new Intent(context, DetailActivity.class);
+            intent.putExtra(Movie.TAG, currentMovie);
+            intent.putExtra(DetailActivity.TAG, currentMovie);
+            context.startActivity(intent);
+            });
     }
 
     @Override
     public int getItemCount() {
-        if (null == movieList){
-            return 0;
-        }
+        if (null == movieList){ return 0; }
         return movieList.size();
-    }
-
-    public void setMovieList(List<Movie> movie) {
-        movieList = movie;
-        notifyDataSetChanged();
     }
 }
 

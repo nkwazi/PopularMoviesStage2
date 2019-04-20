@@ -128,7 +128,7 @@ public class DetailActivity extends AppCompatActivity {
     private void populateReviews(Bundle savedInstance) {
 
         LinearLayoutManager layoutManager = new LinearLayoutManager(this,
-                LinearLayoutManager.VERTICAL, false);
+                RecyclerView.VERTICAL, false);
         review_rv.setLayoutManager(layoutManager);
         review_rv.setHasFixedSize(true);
 
@@ -140,7 +140,7 @@ public class DetailActivity extends AppCompatActivity {
 
     private void loadReviewData(Bundle savedInstance) {
         if (savedInstance != null && savedInstance.containsKey(Movie.TAG)) {
-            reviewAdapter.setItems(savedInstance.<Review>getParcelableArrayList(Movie.TAG));
+            reviewAdapter.setItems(savedInstance.getParcelableArrayList(Movie.TAG));
         } else {
             Service apiService = RetrofitClient.getClient().create(Service.class);
 
