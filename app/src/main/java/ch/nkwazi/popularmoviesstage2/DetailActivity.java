@@ -1,14 +1,19 @@
 package ch.nkwazi.popularmoviesstage2;
 
+import android.content.ContentValues;
 import android.content.Intent;
+import android.database.Cursor;
+import android.net.Uri;
 import android.os.Bundle;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import android.view.View;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.squareup.picasso.Picasso;
 
@@ -19,6 +24,7 @@ import butterknife.ButterKnife;
 import ch.nkwazi.popularmoviesstage2.api.ApiResponse;
 import ch.nkwazi.popularmoviesstage2.api.RetrofitClient;
 import ch.nkwazi.popularmoviesstage2.api.Service;
+import ch.nkwazi.popularmoviesstage2.data.MovieContract;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -42,9 +48,13 @@ public class DetailActivity extends AppCompatActivity {
     @BindView(R.id.rv_review)
     RecyclerView review_rv;
 
+    @BindView(R.id.fav_button)
+    ImageButton favButton;
+
     private TrailerAdapter trailerAdapter;
     private ReviewAdapter reviewAdapter;
     private Movie movie;
+    private Boolean isMovieFavorited = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -59,6 +69,31 @@ public class DetailActivity extends AppCompatActivity {
         populateUI();
         populateTrailers(savedInstanceState);
         populateReviews(savedInstanceState);
+        handleFavoriteButton();
+    }
+
+    public void handleFavoriteButton() {
+        final ImageButton favButton = findViewById(R.id.fav_button);
+        isMovieFavorited  = isMovieInDatabase(movie.movieId);
+        if(isMovieFavorited){
+            favButton.setImageResource(R.drawable.baseline_favorite_black_18dp);
+        } else {
+            favButton.setImageResource(R.drawable.baseline_favorite_black_18dp);
+        }
+        favButton.setOnClickListener(v -> {
+
+            boolean isFavourite = isMovieInDatabase(movie.movieId);
+            if(isFavourite){
+                getContentResolver().delete(MovieContract.MovieEntry.CONTENT_URI.buildUpon().appendPath(movie.movieId).build(),null,null);
+                favButton.setImageResource(R.drawable.baseline_favorite_black_18dp);
+                Toast.makeText(getApplicationContext(),"Movie Removed From Favourites :(" ,Toast.LENGTH_SHORT).show();
+            }
+            else
+            {
+                saveMovieToDatabase();
+                favButton.setImageResource(R.drawable.baseline_favorite_black_18dp);
+            }
+        });
     }
 
     private void populateUI(){
@@ -96,7 +131,7 @@ public class DetailActivity extends AppCompatActivity {
 
     private void loadTrailerData(Bundle savedInstance){
         if (savedInstance != null && savedInstance.containsKey(Movie.TAG)) {
-            trailerAdapter.setItems(savedInstance.<Trailer>getParcelableArrayList(Movie.TAG));
+            trailerAdapter.setItems(savedInstance.getParcelableArrayList(Movie.TAG));
         } else {
             Service apiService = RetrofitClient.getClient().create(Service.class);
 
@@ -164,6 +199,41 @@ public class DetailActivity extends AppCompatActivity {
                 }
             });
         }
+    }
+
+    private void saveMovieToDatabase(){
+        ContentValues values = new ContentValues();
+        values.put(MovieContract.MovieEntry.COLUMN_TMDB_ID,movie.movieId);
+        values.put(MovieContract.MovieEntry.COLUMN_MOVIE_TITLE,movie.movieTitle);
+        values.put(MovieContract.MovieEntry.COLUMN_POSTER_PATH,movie.moviePosterPath);
+        values.put(MovieContract.MovieEntry.COLUMN_USER_RATING,movie.movieRating);
+        values.put(MovieContract.MovieEntry.COLUMN_PLOT_SYNOPSIS,movie.movieOverview);
+        values.put(MovieContract.MovieEntry.COLUMN_RELEASE_DATE,movie.movieReleaseDate);
+        Uri newUri = getContentResolver().insert(MovieContract.MovieEntry.CONTENT_URI,values);
+        if(newUri != null){
+            Toast.makeText(this,"Movie saved to favourites <3",Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    private boolean isMovieInDatabase(String id){
+        String[] projection = {
+
+                MovieContract.MovieEntry.COLUMN_TMDB_ID,
+                MovieContract.MovieEntry.COLUMN_MOVIE_TITLE,
+                MovieContract.MovieEntry.COLUMN_POSTER_PATH,
+                MovieContract.MovieEntry.COLUMN_USER_RATING,
+                MovieContract.MovieEntry.COLUMN_PLOT_SYNOPSIS,
+                MovieContract.MovieEntry.COLUMN_RELEASE_DATE};
+
+        Cursor cursor = getContentResolver().query(MovieContract.MovieEntry.CONTENT_URI,projection,
+                MovieContract.MovieEntry.COLUMN_TMDB_ID + "= '"+id+"'",null,null);
+        if (cursor != null){
+            if (cursor.getCount()>0){
+                return true;
+            }
+            cursor.close();
+        }
+        return false;
     }
 
 }

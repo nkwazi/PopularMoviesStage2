@@ -47,19 +47,16 @@ public class MovieCursorAdapter extends CursorAdapter {
 
 
         Picasso.get().load(IMAGE_URL+POSTER_SIZE+currentMoviePosterPath).into(posterImage);
-        posterImage.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent detailsIntent = new Intent(context, FavoriteDetailActivity.class);
-                detailsIntent.putExtra("tmdbId",currentTmdbId);
-                detailsIntent.putExtra("poster path",currentMoviePosterPath);
-                detailsIntent.putExtra("movie title",currentMovieTitle);
-                detailsIntent.putExtra("user rating",currentUserRating);
-                detailsIntent.putExtra("release date",currentReleaseDate);
-                detailsIntent.putExtra("plot synopsis",currentPlotSynopsis);
-                (context).startActivity(detailsIntent);
+        posterImage.setOnClickListener(v -> {
+            Intent detailsIntent = new Intent(context, FavoriteDetailActivity.class);
+            detailsIntent.putExtra("tmdbId",currentTmdbId);
+            detailsIntent.putExtra("poster path",currentMoviePosterPath);
+            detailsIntent.putExtra("movie title",currentMovieTitle);
+            detailsIntent.putExtra("user rating",currentUserRating);
+            detailsIntent.putExtra("release date",currentReleaseDate);
+            detailsIntent.putExtra("plot synopsis",currentPlotSynopsis);
+            (context).startActivity(detailsIntent);
 
-            }
         });
 
     }
