@@ -3,13 +3,16 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:layout_marginBottom="8dp">
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_marginBottom="8dp"
+    tools:background="#000">
 
     <ImageView
         android:id="@+id/review_avatar"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_margin="1dp"
+        android:src="@drawable/user_icon"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintStart_toStartOf="parent"/>
 
@@ -17,16 +20,21 @@
         android:id="@+id/review_author"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginStart="5dp"
+        android:textColor="@color/text_color"
         app:layout_constraintStart_toEndOf="@id/review_avatar"
         app:layout_constraintTop_toTopOf="@id/review_avatar"
-        app:layout_constraintBottom_toBottomOf="@id/review_avatar"/>
+        app:layout_constraintBottom_toBottomOf="@id/review_avatar"
+        tools:text="Author"/>
 
     <TextView
         android:id="@+id/review_content"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:maxLines="7"
+        android:textColor="@color/text_color"
         app:layout_constraintStart_toStartOf="@id/review_author"
-        app:layout_constraintTop_toBottomOf="@id/review_avatar"/>
+        app:layout_constraintTop_toBottomOf="@id/review_avatar"
+        tools:text="Content"/>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

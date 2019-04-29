@@ -1,26 +1,34 @@
 package ch.nkwazi.popularmoviesstage2;
 
 import android.content.Context;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.lifecycle.ViewModelProviders;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.view.View;
 import android.widget.ProgressBar;
-import android.widget.Toast;
+
+import java.io.IOException;
+import java.net.URL;
+import java.util.ArrayList;
 import java.util.List;
-import android.content.Intent;
+import android.widget.TextView;
+
 import butterknife.BindView;
 import butterknife.ButterKnife;
-import ch.nkwazi.popularmoviesstage2.api.ApiResponse;
-import ch.nkwazi.popularmoviesstage2.api.RetrofitClient;
-import ch.nkwazi.popularmoviesstage2.api.Service;
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
+import ch.nkwazi.popularmoviesstage2.adapter.MovieAdapter;
+import ch.nkwazi.popularmoviesstage2.model.Movie;
+
+import static ch.nkwazi.popularmoviesstage2.utils.JsonUtils.parseMovieJson;
+import static ch.nkwazi.popularmoviesstage2.utils.NetworkUtils.buildMovieUrl;
+import static ch.nkwazi.popularmoviesstage2.utils.NetworkUtils.makeHttpRequest;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -30,8 +38,15 @@ public class MainActivity extends AppCompatActivity {
     @BindView(R.id.recyclerView)
     RecyclerView mRecyclerView;
 
-    private Context context = this;
-    private MovieAdapter movieAdapter;
+    @BindView(R.id.connection)
+    TextView mConnection;
+
+    private static final String TOP_RATED = "top_rated";
+    private static final String POPULAR = "popular";
+    private static final String KEY = "key";
+    MovieAdapter movieAdapter;
+    ArrayList<Movie> movieResults;
+    private FavoriteViewModel favoriteViewModel;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -39,12 +54,30 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         ButterKnife.bind(this);
 
-        GridLayoutManager layoutManager = new GridLayoutManager(this, 2);
+        if (savedInstanceState != null && savedInstanceState.containsKey(KEY)) {
+            movieResults = savedInstanceState.getParcelableArrayList(KEY);
+        } else {
+            movieResults = new ArrayList<>();
+            if (isOnline()) {
+                mConnection.setVisibility(View.INVISIBLE);
+                loadMovies(TOP_RATED);
+            } else {
+                mConnection.setVisibility(View.VISIBLE);
+            }
+        }
 
-        mRecyclerView.setLayoutManager(layoutManager);
+        mRecyclerView.setLayoutManager(new GridLayoutManager(this, 2));
         mRecyclerView.setHasFixedSize(true);
+        movieAdapter = new MovieAdapter(this, movieResults);
+        mRecyclerView.setAdapter(movieAdapter);
 
-        loadMovies("top_rated");
+        favoriteViewModel = ViewModelProviders.of(this).get(FavoriteViewModel.class);
+    }
+
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        outState.putParcelableArrayList(KEY, movieResults);
+        super.onSaveInstanceState(outState);
     }
 
     @Override
@@ -58,55 +91,59 @@ public class MainActivity extends AppCompatActivity {
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.sort_popular:
-                loadMovies("popular");
+                loadMovies(POPULAR);
                 return true;
             case R.id.sort_rated:
-                loadMovies("top_rated");
+                loadMovies(TOP_RATED);
                 return true;
             case R.id.favorite:
-                launchFavoriteActivity();
+                favoriteViewModel.getFavoriteMovies().observe(this, movies -> {
+                    movieResults.clear();
+                    movieResults.addAll(movies);
+                    movieAdapter.notifyDataSetChanged();
+                });
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
         }
     }
 
-    private void launchFavoriteActivity() {
-        Intent intent = new Intent(this, FavoriteActivity.class);
-        startActivity(intent);
+    private void loadMovies(String string) {
+        new MovieAsyncTask().execute(string);
     }
 
-    private void loadMovies(String sort) {
-        Service apiService = RetrofitClient.getClient().create(Service.class);
+    private boolean isOnline() {
+        ConnectivityManager cm = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo networkInfo = cm.getActiveNetworkInfo();
+        return networkInfo != null && networkInfo.isConnectedOrConnecting();
+    }
 
-        Call<ApiResponse<Movie>> call;
+    public class MovieAsyncTask extends AsyncTask<String, Void, List<Movie>> {
 
-        if (sort.equals("top_rated")){
-            call = apiService.getTopRatedMovies(BuildConfig.API_KEY);
-        } else {
-            call = apiService.getPopularMovies(BuildConfig.API_KEY);
+        @Override
+        protected List<Movie> doInBackground(String... strings) {
+            if (strings.length == 0) {
+                return null;
+            }
+            String orderBy = strings[0];
+            URL url = buildMovieUrl(orderBy);
+
+            try {
+                String getResponse = makeHttpRequest(url);
+                return parseMovieJson(getResponse);
+            } catch (IOException e) {
+                e.printStackTrace();
+                return null;
+            }
         }
 
-        call.enqueue(new Callback<ApiResponse<Movie>>() {
-            @Override
-            public void onResponse(Call<ApiResponse<Movie>> call, Response<ApiResponse<Movie>> response) {
-                if (response.isSuccessful()) {
-                    List<Movie> movies = fetchResults(response);
-                    movieAdapter = new MovieAdapter(context, movies);
-                    mRecyclerView.setAdapter(movieAdapter);
-                }
+        @Override
+        protected void onPostExecute(List<Movie> MovieResults) {
+            if (MovieResults != null && !MovieResults.isEmpty()) {
+                movieResults.clear();
+                movieResults.addAll(MovieResults);
+                movieAdapter.notifyDataSetChanged();
             }
-
-            @Override
-            public void onFailure(Call<ApiResponse<Movie>> call, Throwable t) {
-                Log.d("Error", t.getMessage());
-                Toast.makeText(MainActivity.this, "Error Fetching Data!", Toast.LENGTH_SHORT).show();
-            }
-        });
-    }
-
-    private List<Movie> fetchResults(Response<ApiResponse<Movie>> response) {
-        ApiResponse<Movie> movieApiResponse = response.body();
-        return movieApiResponse.results;
+        }
     }
 }

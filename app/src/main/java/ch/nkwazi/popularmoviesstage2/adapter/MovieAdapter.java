@@ -1,9 +1,14 @@
-package ch.nkwazi.popularmoviesstage2;
+package ch.nkwazi.popularmoviesstage2.adapter;
 
 import android.content.Context;
 import android.content.Intent;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
+import butterknife.BindView;
+import butterknife.ButterKnife;
+import ch.nkwazi.popularmoviesstage2.DetailActivity;
+import ch.nkwazi.popularmoviesstage2.R;
+import ch.nkwazi.popularmoviesstage2.model.Movie;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -19,7 +24,7 @@ import java.util.List;
 
 public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.MovieViewHolder> {
 
-    private final Context context;
+    private Context context;
     private List<Movie> movieList;
 
     public MovieAdapter(Context mContext, List<Movie> movieList) {
@@ -28,40 +33,43 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.MovieViewHol
     }
 
     public class MovieViewHolder extends RecyclerView.ViewHolder {
-
-        final ImageView myImageView;
+        @BindView(R.id.coverPicture)
+        ImageView myImageView;
 
         MovieViewHolder(View view){
             super(view);
-            myImageView = view.findViewById(R.id.coverPicture);
+            ButterKnife.bind(this, view);
         }
     }
 
     @NonNull
     @Override
     public MovieViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View view = LayoutInflater.from(context).inflate(R.layout.movie_overview, parent, false);
+        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.movie_overview, parent, false);
         return new MovieViewHolder(view);
     }
 
     @Override
     public void onBindViewHolder(@NonNull MovieViewHolder holder, int position) {
-        String image = movieList.get(position).moviePosterPath;
-        Picasso.get().load("http://image.tmdb.org/t/p/w780".concat(image)).into(holder.myImageView);
+        Picasso.get()
+                .load(movieList.get(position).getMoviePosterPath())
+                .into(holder.myImageView);
 
         holder.myImageView.setOnClickListener(v -> {
-            Movie currentMovie = movieList.get(position);
             Intent intent = new Intent(context, DetailActivity.class);
-            intent.putExtra(Movie.TAG, currentMovie);
-            intent.putExtra(DetailActivity.TAG, currentMovie);
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            intent.putExtra("movie", movieList.get(position));
             context.startActivity(intent);
-            });
+        });
     }
 
     @Override
-    public int getItemCount() {
-        if (null == movieList){ return 0; }
-        return movieList.size();
+    public int getItemCount() { return movieList.size(); }
+
+    public void setMovieList(List<Movie> movie) {
+        this.movieList = movie;
+        notifyDataSetChanged();
     }
+
 }
 

@@ -1,9 +1,7 @@
-package ch.nkwazi.popularmoviesstage2;
+package ch.nkwazi.popularmoviesstage2.model;
 
 import android.os.Parcel;
 import android.os.Parcelable;
-
-import com.google.gson.annotations.SerializedName;
 
 /**
  * Created by nkwazi on 29.01.19.
@@ -11,12 +9,14 @@ import com.google.gson.annotations.SerializedName;
 
 public class Review implements Parcelable {
 
-    @SerializedName("author")
-    private String author;
-    @SerializedName("content")
-    private String content;
+    private String author, content;
 
-    public Review(Parcel in) {
+    public Review(String author, String content){
+        this.author = author;
+        this.content = content;
+    }
+
+    private Review(Parcel in) {
         author = in.readString();
         content = in.readString();
     }
@@ -40,7 +40,7 @@ public class Review implements Parcelable {
         dest.writeString(content);
     }
 
-    public static final Parcelable.Creator<Review> CREATOR = new Parcelable.Creator<Review>() {
+    public static final Creator<Review> CREATOR = new Creator<Review>() {
 
         @Override
         public Review createFromParcel(Parcel source) {
