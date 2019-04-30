@@ -1,8 +1,5 @@
 package ch.nkwazi.popularmoviesstage2;
 
-import android.content.Context;
-import android.net.ConnectivityManager;
-import android.net.NetworkInfo;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import androidx.appcompat.app.AppCompatActivity;
@@ -25,6 +22,7 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import ch.nkwazi.popularmoviesstage2.adapter.MovieAdapter;
 import ch.nkwazi.popularmoviesstage2.model.Movie;
+import ch.nkwazi.popularmoviesstage2.utils.NetworkUtils;
 
 import static ch.nkwazi.popularmoviesstage2.utils.JsonUtils.parseMovieJson;
 import static ch.nkwazi.popularmoviesstage2.utils.NetworkUtils.buildMovieUrl;
@@ -58,7 +56,7 @@ public class MainActivity extends AppCompatActivity {
             movieResults = savedInstanceState.getParcelableArrayList(KEY);
         } else {
             movieResults = new ArrayList<>();
-            if (isOnline()) {
+            if (NetworkUtils.isOnline(this)) {
                 mConnection.setVisibility(View.INVISIBLE);
                 loadMovies(TOP_RATED);
             } else {
@@ -110,12 +108,6 @@ public class MainActivity extends AppCompatActivity {
 
     private void loadMovies(String string) {
         new MovieAsyncTask().execute(string);
-    }
-
-    private boolean isOnline() {
-        ConnectivityManager cm = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
-        NetworkInfo networkInfo = cm.getActiveNetworkInfo();
-        return networkInfo != null && networkInfo.isConnectedOrConnecting();
     }
 
     public class MovieAsyncTask extends AsyncTask<String, Void, List<Movie>> {

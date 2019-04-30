@@ -65,7 +65,7 @@ public class TrailerAdapter extends RecyclerView.Adapter<TrailerAdapter.TrailerV
             ButterKnife.bind(this, view);
             this.onTrailerListener = onTrailerListener;
 
-            view.setOnClickListener(this);
+            imageView.setOnClickListener(this);
         }
 
         @Override

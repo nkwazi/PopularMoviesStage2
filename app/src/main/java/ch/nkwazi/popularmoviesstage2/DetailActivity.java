@@ -1,10 +1,7 @@
 package ch.nkwazi.popularmoviesstage2;
 
 import android.content.ActivityNotFoundException;
-import android.content.Context;
 import android.content.Intent;
-import android.net.ConnectivityManager;
-import android.net.NetworkInfo;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -32,6 +29,7 @@ import ch.nkwazi.popularmoviesstage2.adapter.TrailerAdapter;
 import ch.nkwazi.popularmoviesstage2.data.AppDatabase;
 import ch.nkwazi.popularmoviesstage2.model.Movie;
 import ch.nkwazi.popularmoviesstage2.model.Review;
+import ch.nkwazi.popularmoviesstage2.utils.NetworkUtils;
 
 import static ch.nkwazi.popularmoviesstage2.utils.JsonUtils.parseReviewJson;
 import static ch.nkwazi.popularmoviesstage2.utils.JsonUtils.parseTrailerJson;
@@ -45,7 +43,6 @@ import static ch.nkwazi.popularmoviesstage2.utils.NetworkUtils.makeHttpRequest;
 
 public class DetailActivity extends AppCompatActivity implements TrailerAdapter.OnTrailerListener {
 
-    private static final String BASE_URL = "http://image.tmdb.org/t/p/w500//";
     private static final String RATING = "Rating: ";
     private static final String RELEASED = "Released: ";
 
@@ -90,7 +87,7 @@ public class DetailActivity extends AppCompatActivity implements TrailerAdapter.
         setContentView(R.layout.activity_detail);
         ButterKnife.bind(this);
 
-        if (isOnline()) {
+        if (NetworkUtils.isOnline(this)) {
             connection.setVisibility(View.INVISIBLE);
         } else {
             connection.setVisibility(View.VISIBLE);
@@ -102,6 +99,10 @@ public class DetailActivity extends AppCompatActivity implements TrailerAdapter.
 
         populateUI();
 
+        trailer_rv.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false));
+        trailerAdapter = new TrailerAdapter(movieTrailer, this, this);
+        trailer_rv.setAdapter(trailerAdapter);
+
         new TrailerAsync().execute(String.valueOf(movieId));
         new ReviewAsync().execute(String.valueOf(movieId));
         new SingleMovieAsyncTask().execute(movie);
@@ -109,13 +110,6 @@ public class DetailActivity extends AppCompatActivity implements TrailerAdapter.
         viewModel = ViewModelProviders.of(this).get(FavoriteViewModel.class);
 
         handleFavoriteButton();
-    }
-
-    public boolean isOnline() {
-        ConnectivityManager cm =
-                (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
-        NetworkInfo netInfo = cm.getActiveNetworkInfo();
-        return netInfo != null && netInfo.isConnectedOrConnecting();
     }
 
     public void handleFavoriteButton() {
@@ -144,9 +138,7 @@ public class DetailActivity extends AppCompatActivity implements TrailerAdapter.
         movieTrailer = new ArrayList<>();
         reviewArrayList = new ArrayList<>();
 
-        trailer_rv.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false));
-        trailerAdapter = new TrailerAdapter(movieTrailer, this, this);
-        trailer_rv.setAdapter(trailerAdapter);
+
 
         review_rv.setLayoutManager(new LinearLayoutManager(this));
         reviewAdapter = new ReviewAdapter(reviewArrayList, this);
